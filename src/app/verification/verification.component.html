@@ -1,0 +1,39 @@
+<div class="min-h-screen bg-[#f9f6fa] flex flex-col items-center justify-center p-4">
+  <div class="bg-white p-8 rounded-2xl shadow-lg max-w-md w-full border border-[#d1c6db] rounded-l-md">
+    <h2 class="text-2xl font-bold text-center text-[#d6a3c5] mb-2">Vérification</h2>
+    <p class="text-[#a097ab] text-center mb-4">
+      Entrez le code de vérification
+    </p>
+  
+    <!-- Display current retry attempt -->
+    <p class="text-red-500 text-center mb-4" *ngIf="retryCount > 0">
+      Tentative {{ retryCount }} sur {{ maxRetries }}
+    </p>
+  
+    <!-- Code Input Fields -->
+    <div class="flex justify-center gap-2 mb-6">
+      <ng-container *ngFor="let control of codeControls; let i = index">
+        <input
+          #codeInput
+          type="text"
+          maxLength="1"
+          [formControl]="control"
+          (input)="handleInputChange(i, $event)"
+          class="w-12 h-12 text-center text-xl font-semibold border-2 border-[#d1c6db] rounded-md focus:outline-none focus:border-[#d6a3c5] transition-all duration-200 hover:shadow-sm"
+        />
+      </ng-container>
+    </div>
+  
+  <!-- Resend Code Button (Only show after max retries) -->
+<div class="text-center mt-4">
+  <!-- <button
+    *ngIf="retryCount >= maxRetries"
+    (click)="handleResendCode()"
+    class="text-white bg-[#d6a3c5] hover:bg-[#b07899] font-medium py-2 px-4 rounded-md transition-all duration-200"
+  >
+    Renvoyer le code
+  </button> -->
+</div>
+    </div>
+  </div>
+
