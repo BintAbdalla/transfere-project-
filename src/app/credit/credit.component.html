@@ -1,0 +1,88 @@
+<div class="min-h-screen bg-gradient-to-br from-[#f5f5f5] to-[#e7e7e7]">
+  <!-- Sidebar -->
+  <nav [ngClass]="{ 'translate-x-0': isMenuOpen, '-translate-x-full': !isMenuOpen }" 
+       class="fixed left-0 top-0 h-full w-64 md:w-72 bg-[#ffffff]/90 backdrop-blur-sm shadow-xl border-r border-gray-100 transform md:translate-x-0 transition-transform duration-300">
+    <div class="p-8">
+      <h1 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#d6a3c5] to-[#a75c92]">Sencash</h1>
+    </div>
+    <div class="mt-8 px-4">
+      <button *ngFor="let item of menuItems"
+              (click)="setActiveTab(item.name)"
+              class="w-full flex items-center px-6 py-4 rounded-xl mb-2 transition-all duration-300"
+              [ngClass]="{
+                'bg-gradient-to-r from-[#d6a3c5] to-[#a75c92] text-white shadow-lg transform scale-105': activeTab === item.name,
+                'text-gray-600 hover:bg-[#d6a3c5]/10 hover:text-[#a75c92]': activeTab !== item.name
+              }">
+        <i [ngClass]="item.icon + ' mr-4 text-lg'"></i>
+        <span class="font-medium">{{ item.name }}</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Mobile Hamburger Icon -->
+  <div class="fixed md:hidden top-4 left-4 z-50">
+    <button (click)="toggleMenu()" class="p-3 bg-[#d6a3c5] text-white rounded-full shadow-md focus:outline-none">
+      <i class="fas fa-bars text-xl"></i>
+    </button>
+  </div>
+
+  <!-- Main Content -->
+  <div class="md:ml-72 p-4 md:p-8">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row justify-between items-center mb-8 space-y-4 md:space-y-0">
+      <div class="relative w-full md:w-96">
+        <input type="text" placeholder="Rechercher un crédit..."
+               class="w-full pl-12 pr-4 py-3 rounded-xl border-2 border-[#d1c6db] focus:border-[#d6a3c5] focus:outline-none focus:ring-2 focus:ring-[#d6a3c5]/50 transition-all duration-300 bg-[#f9f6fa]" />
+        <i class="fas fa-search absolute left-4 top-3.5 text-gray-400"></i>
+      </div>
+      <div class="flex items-center space-x-6">
+        <button class="relative p-3 rounded-xl hover:bg-[#d6a3c5]/10 transition-colors duration-300">
+          <i class="fas fa-cog  text-gray-600 text-xl"></i>
+          <span class="absolute top-2 right-2 h-2 w-2 bg-red-500 rounded-full"></span>
+        </button>
+        <div class="h-12 w-12 rounded-xl bg-gradient-to-r from-[#d6a3c5] to-[#a75c92] flex items-center justify-center shadow-lg">
+          <i class="fas fa-user text-white text-xl"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Formulaire d'envoi de crédit et Liste des Favoris côte à côte -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <!-- Formulaire d'envoi de crédit -->
+      <div class="bg-[#ffffff]/90 backdrop-blur-sm rounded-2xl shadow-lg p-6">
+        <h2 class="text-xl font-bold text-gray-700 mb-6">Envoyer du Crédit</h2>
+        <div class="mb-4">
+          <label for="phone" class="block mb-2 text-sm font-medium text-gray-700">Numéro de téléphone</label>
+          <input type="text" id="phone" [(ngModel)]="phoneNumber" (input)="onPhoneNumberInput($event)" placeholder="Entrer le numéro de téléphone"
+                 class="w-full pl-4 py-3 rounded-xl border-2 border-[#d1c6db] focus:border-[#d6a3c5] focus:outline-none focus:ring-2 focus:ring-[#d6a3c5]/50 transition-all duration-300 bg-[#f9f6fa]" />
+        </div>
+        <div class="mb-4">
+          <label for="operator" class="block mb-2 text-sm font-medium text-gray-700">Opérateur</label>
+          <select id="operator" [(ngModel)]="selectedOperator" class="w-full pl-4 py-3 rounded-xl border-2 border-[#d1c6db] focus:border-[#d6a3c5] focus:outline-none focus:ring-2 focus:ring-[#d6a3c5]/50 transition-all duration-300 bg-[#f9f6fa]">
+            <option *ngFor="let operator of operators" [value]="operator.id">{{ operator.name }}</option>
+          </select>
+        </div>
+        <div class="mb-4">
+          <label for="amount" class="block mb-2 text-sm font-medium text-gray-700">Montant</label>
+          <input type="number" id="amount" [(ngModel)]="montant" placeholder="Entrer le montant"
+                 class="w-full pl-4 py-3 rounded-xl border-2 border-[#d1c6db] focus:border-[#d6a3c5] focus:outline-none focus:ring-2 focus:ring-[#d6a3c5]/50 transition-all duration-300 bg-[#f9f6fa]" />
+        </div>
+        <button (click)="handleSubmit()" class="w-full p-3 bg-gradient-to-r from-[#d6a3c5] to-[#a75c92] text-white rounded-xl transition-all duration-300 hover:scale-105">Envoyer</button>
+        <div *ngIf="showSuccess" class="mt-4 text-green-600">Crédit envoyé avec succès !</div>
+      </div>
+
+      <!-- Liste des Favoris -->
+      <div class="bg-[#ffffff]/90 backdrop-blur-sm rounded-2xl shadow-lg p-6">
+        <h2 class="text-xl font-bold text-gray-700 mb-6">Favoris</h2>
+        <ul>
+          <li *ngFor="let favorite of contacts" (click)="selectFavorite(favorite)" class="flex justify-between items-center p-4 rounded-lg hover:bg-[#d6a3c5]/10 transition-all duration-300">
+            <div>
+              <p class="font-semibold text-gray-800">{{ favorite.nom }}</p>
+              <p class="text-sm text-gray-500">{{ favorite.telephone }}</p>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>

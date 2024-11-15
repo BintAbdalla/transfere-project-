@@ -1,0 +1,127 @@
+<div class="min-h-screen bg-gradient-to-br from-[#f5f5f5] to-[#e7e7e7]">
+  <!-- Sidebar -->
+  <nav [ngClass]="{ 'translate-x-0': isMenuOpen, '-translate-x-full': !isMenuOpen }" 
+       class="fixed left-0 top-0 h-full w-64 md:w-72 bg-[#ffffff]/90 backdrop-blur-sm shadow-xl border-r border-gray-100 transform md:translate-x-0 transition-transform duration-300">
+    <div class="p-8">
+      <h1 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#d6a3c5] to-[#a75c92]">Sencash</h1>
+    </div>
+    <div class="mt-8 px-4">
+      <button *ngFor="let item of menuItems"
+              (click)="setActiveTab(item.name)"
+              class="w-full flex items-center px-6 py-4 rounded-xl mb-2 transition-all duration-300"
+              [ngClass]="{
+                'bg-gradient-to-r from-[#d6a3c5] to-[#a75c92] text-white shadow-lg transform scale-105': activeTab === item.name,
+                'text-gray-600 hover:bg-[#d6a3c5]/10 hover:text-[#a75c92]': activeTab !== item.name
+              }">
+        <i [ngClass]="item.icon + ' mr-4 text-lg'"></i>
+        <span class="font-medium">{{ item.name }}</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Mobile Hamburger Icon -->
+  <div class="fixed md:hidden top-4 left-4 z-50">
+    <button (click)="toggleMenu()" class="p-3 bg-[#d6a3c5] text-white rounded-full shadow-md focus:outline-none">
+      <i class="fas fa-bars text-xl"></i>
+    </button>
+  </div>
+
+  <!-- Main Content -->
+  <div class="md:ml-72 p-4 md:p-8">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row justify-between items-center mb-8 space-y-4 md:space-y-0">
+      <div class="relative w-full md:w-96">
+        <input type="text" placeholder="Rechercher une transaction..."
+               class="w-full pl-12 pr-4 py-3 rounded-xl border-2 border-[#d1c6db] focus:border-[#d6a3c5] focus:outline-none focus:ring-2 focus:ring-[#d6a3c5]/50 transition-all duration-300 bg-[#f9f6fa]" />
+        <i class="fas fa-search absolute left-4 top-3.5 text-gray-400"></i>
+      </div>
+      <div class="flex items-center space-x-6">
+        <button class="relative p-3 rounded-xl hover:bg-[#d6a3c5]/10 transition-colors duration-300">
+          <i class="fas fa-cog  text-gray-600 text-xl"></i>
+          <span class="absolute top-2 right-2 h-2 w-2 bg-red-500 rounded-full"></span>
+        </button>
+        <div class="h-12 w-12 rounded-xl bg-gradient-to-r from-[#d6a3c5] to-[#a75c92] flex items-center justify-center shadow-lg">
+          <i class="fas fa-user text-white text-xl"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card Section -->
+    <div class="w-96 h-56 bg-gradient-to-r from-pink-300 to-purple-900 rounded-xl p-6 text-white shadow-lg mb-8">
+      <div class="flex flex-col h-full justify-between">
+        <div class="flex justify-between items-center">
+          <div class="text-lg font-semibold">Ma Carte</div>
+          <button 
+            (click)="toggleBalance()"
+            class="p-2 hover:bg-white/10 rounded-full transition-colors"
+          >
+            <ng-container *ngIf="showBalance; else showEyeOff">
+              <i class="fas fa-eye w-5 h-5"></i>
+            </ng-container>
+            <ng-template #showEyeOff>
+              <i class="fas fa-eye-slash w-5 h-5"></i>
+            </ng-template>
+          </button>
+        </div>
+    
+        <div class="space-y-4">
+          <div class="text-2xl font-bold">
+            <ng-container *ngIf="showBalance; else hiddenBalance">
+              {{ balance | currency: 'EUR' }}
+            </ng-container>
+            <ng-template #hiddenBalance>••••••• €</ng-template>
+          </div>
+          
+          <div class="text-sm">
+            **** **** **** 1234
+          </div>
+        </div>
+    
+        <div class="text-sm">
+          {{ owner }}
+        </div>
+      </div>
+    </div>
+
+    <div class="px-4">
+    <h2 class="text-xl font-bold mb-4">Banques disponibles</h2>
+    
+    <div *ngIf="!selectedBanque; else banqueDetailView">
+      <ul>
+        <li *ngFor="let banque of banques" 
+            (click)="selectBanque(banque)"
+            class="mb-4 bg-white p-4 rounded-lg shadow-lg transition transform duration-200 cursor-pointer hover:shadow-xl hover:-translate-y-1 active:scale-95">
+          <div class="flex items-center justify-between">
+            <span class="text-lg font-medium text-gray-800">{{ banque.nom }}</span>
+            <span class="text-sm text-gray-500">Code: {{ banque.code }}</span>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Banque Détail View -->
+    <ng-template #banqueDetailView>
+      <div class="bg-white p-6 rounded-lg shadow-xl transition transform duration-200">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-2xl font-semibold text-gray-800">{{ selectedBanque.nom }}</h3>
+          <button (click)="deselectBanque()" class="text-gray-500 hover:text-gray-800 transition">
+            <i class="fas fa-times text-lg"></i>
+          </button>
+        </div>
+        <div class="mb-4">
+          <p class="text-gray-500">Code: {{ selectedBanque.code }}</p>
+          <img *ngIf="selectedBanque.logo" [src]="selectedBanque.logo" alt="{{ selectedBanque.nom }} logo" class="h-16 mt-4"/>
+        </div>
+
+        <label for="amount" class="block text-gray-600 mb-2">Montant à virer :</label>
+        <input id="amount" type="number" placeholder="Entrez le montant" class="w-full p-3 rounded-md border-2 border-gray-300 focus:border-[#d6a3c5] focus:outline-none mb-4" />
+
+        <div class="flex justify-end space-x-4">
+          <button (click)="deselectBanque()" class="py-2 px-4 bg-gray-300 rounded-lg hover:bg-gray-400 transition">Annuler</button>
+          <button (click)="confirmTransaction()" class="py-2 px-4 bg-[#d6a3c5] text-white rounded-lg hover:bg-[#a75c92] transition">Confirmer</button>
+        </div>
+      </div>
+    </ng-template>
+  </div>
+  </div>
+</div>

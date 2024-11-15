@@ -1,5 +1,183 @@
-<head>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- Autres balises -->
-  </head>
-  
+<div class="min-h-screen bg-gradient-to-br from-[#f5f5f5] to-[#e7e7e7]">
+  <!-- Sidebar -->
+  <nav [ngClass]="{ 'translate-x-0': isMenuOpen, '-translate-x-full': !isMenuOpen }" 
+       class="fixed left-0 top-0 h-full w-64 md:w-72 bg-[#ffffff]/90 backdrop-blur-sm shadow-xl border-r border-gray-100 transform md:translate-x-0 transition-transform duration-300">
+    <div class="p-8">
+      <h1 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#d6a3c5] to-[#a75c92]">Sencash</h1>
+    </div>
+    <div class="mt-8 px-4">
+      <button *ngFor="let item of menuItems"
+              (click)="setActiveTab(item.name)"
+              class="w-full flex items-center px-6 py-4 rounded-xl mb-2 transition-all duration-300"
+              [ngClass]="{
+                'bg-gradient-to-r from-[#d6a3c5] to-[#a75c92] text-white shadow-lg transform scale-105': activeTab === item.name,
+                'text-gray-600 hover:bg-[#d6a3c5]/10 hover:text-[#a75c92]': activeTab !== item.name
+              }">
+        <i [ngClass]="item.icon + ' mr-4 text-lg'"></i>
+        <span class="font-medium">{{ item.name }}</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Mobile Hamburger Icon -->
+  <div class="fixed md:hidden top-4 left-4 z-50">
+    <button (click)="toggleMenu()" class="p-3 bg-[#d6a3c5] text-white rounded-full shadow-md focus:outline-none">
+      <i class="fas fa-bars text-xl"></i>
+    </button>
+  </div>
+
+  <!-- Main Content -->
+  <div class="md:ml-72 p-4 md:p-8">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row justify-between items-center mb-8 space-y-4 md:space-y-0">
+      <div class="relative w-full md:w-96">
+        <input type="text" placeholder="Rechercher une transaction..."
+               class="w-full pl-12 pr-4 py-3 rounded-xl border-2 border-[#d1c6db] focus:border-[#d6a3c5] focus:outline-none focus:ring-2 focus:ring-[#d6a3c5]/50 transition-all duration-300 bg-[#f9f6fa]" />
+        <i class="fas fa-search absolute left-4 top-3.5 text-gray-400"></i>
+      </div>
+      <div class="flex items-center space-x-6">
+        <button class="relative p-3 rounded-xl hover:bg-[#d6a3c5]/10 transition-colors duration-300">
+          <i class="fas fa-cog  text-gray-600 text-xl"></i>
+          <span class="absolute top-2 right-2 h-2 w-2 bg-red-500 rounded-full"></span>
+        </button>
+        <div class="h-12 w-12 rounded-xl bg-gradient-to-r from-[#d6a3c5] to-[#a75c92] flex items-center justify-center shadow-lg">
+          <i class="fas fa-user text-white text-xl"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      <!-- Balance Card -->
+      <div class="bg-[#ffffff]/90 backdrop-blur-sm rounded-2xl shadow-lg p-6 transform transition-all duration-300 hover:scale-105">
+        <div class="flex justify-between items-center">
+          <div>
+            <h2 class="text-lg font-bold text-gray-700 mb-4">Solde du portefeuille</h2>
+            <div class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#d6a3c5] to-[#a75c92]">
+              {{ walletSolde | number }}F
+            </div>
+          </div>
+          <div class="bg-gradient-to-r from-[#d6a3c5] to-[#a75c92] p-4 rounded-xl shadow-lg">
+            <i class="fas fa-wallet text-white text-xl"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- QR Code Card -->
+      <div class="bg-[#ffffff]/90 backdrop-blur-sm rounded-2xl shadow-lg p-6 transform transition-all duration-300 hover:scale-105">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-lg font-bold text-gray-700">Code QR du compte</h2>
+          <div class="bg-gradient-to-r from-[#d6a3c5] to-[#a75c92] p-2 rounded-xl shadow-lg">
+            <i class="fas fa-qrcode text-white text-xl"></i>
+          </div>
+        </div>
+        <div class="flex justify-center items-center p-4 bg-white rounded-xl">
+          <div class="w-32 h-32">
+            <!-- <img src="assets/qr-code.png" alt="QR Code" class="w-full h-full object-contain"
+                 onerror="this.src='data:image/svg+xml;base64,...'" /> -->
+          </div>
+        </div>
+        <p class="text-center text-sm text-gray-500 mt-4">Scannez pour recevoir un paiement</p>
+      </div>
+    </div>
+
+    <div class="bg-[#ffffff]/90 backdrop-blur-sm rounded-2xl shadow-lg p-8 mb-8">
+      <h2 class="text-xl font-bold text-gray-700 mb-6">Historique des transactions</h2>
+      <div class="space-y-2">
+        <!-- Transactions envoyées -->
+        <div *ngFor="let transaction of allTransactions"
+             class="flex flex-col md:flex-row justify-between items-center p-4 rounded-xl border border-transparent hover:border-gray-100 hover:shadow-md active:shadow-lg active:animate-wiggle hover:scale-105 transition-all duration-300"
+             (click)="showTransactionDetails(transaction)">
+          <div class="flex items-center space-x-4">
+            <div class="p-3 rounded-xl bg-red-100 text-red-600 shadow" *ngIf="transaction.type_transaction === 'recharge_credit'">
+              <i class="fas fa-arrow-up"></i>
+            </div>
+
+            <div class="p-3 rounded-xl bg-red-100 text-red-600 shadow" *ngIf="transaction.type_transaction === 'transfert' && !transaction.montant_recus">
+              <i class="fas fa-arrow-up"></i>
+            </div>
+
+            <div class="p-3 rounded-xl bg-green-100 text-green-600 shadow" *ngIf="transaction.type_transaction === 'transfert' &&transaction.montant_recus">
+              <i class="fas fa-arrow-down"></i>
+            </div>
+
+
+            <div>
+              <p class="font-semibold text-gray-800">
+                <ng-container *ngIf="transaction?.type_transaction === 'recharge_credit'">
+                  <!-- Vérification si l'utilisateur connecté est le récepteur du crédit -->
+                  <ng-container >
+                    <ng-container *ngIf="transaction.receiver_id === currentUser?.id">
+                      Vous avez acheté du crédit.
+                    </ng-container>
+                    <ng-container *ngIf="transaction.receiver_id !== currentUser?.id">
+                      Vous avez acheté du crédit pour {{ transaction.receiver ? transaction.receiver.prenom :  transaction.sender!.prenom }} {{ transaction.receiver ?transaction.receiver.nom :transaction.sender!.nom }}.
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+              
+                <!-- Affichage pour les transactions de transfert d'argent -->
+                <ng-container *ngIf="transaction.type_transaction === 'transfert'">
+                
+                  <ng-container *ngIf="transaction.receiver">
+                    À {{ transaction.receiver?.prenom + " " + transaction.receiver?.nom || 'Inconnu' }} 
+                  </ng-container>
+
+                  <ng-container *ngIf="transaction.sender">
+                    De {{ transaction.sender?.prenom + " " + transaction.sender?.nom || 'Inconnu' }} 
+                  </ng-container>
+                </ng-container>
+              
+                <!-- Affichage pour d'autres types de transaction -->
+                <ng-container *ngIf="transaction.type_transaction !== 'recharge_credit' && transaction.type_transaction !== 'transfert'">
+                  De {{ transaction.sender?.prenom + " " + transaction.sender?.nom || 'Inconnu' }}
+                </ng-container>
+               <!-- Affichage de la date -->
+        <p class="text-sm text-gray-500">
+          {{ transaction.createdAt | date: 'dd/MM/yyyy' }}
+        </p>
+              
+         </div>
+          </div>
+          <span class="font-bold text-lg text-red-600">-{{ transaction.montant_envoye }}F</span>
+          <!-- <span class="font-bold text-lg text-green-600">+{{ transaction.montant_recus }}F</span> -->
+        </div>
+
+        <!-- Transactions reçues -->
+     
+      </div>
+    </div>
+
+    <!-- Transaction Details Modal -->
+    <div *ngIf="selectedTransaction" 
+     class="fixed inset-0 bg-black bg-opacity-60 z-50 flex justify-center items-center p-4">
+  <div class="bg-white p-10 rounded-2xl w-full max-w-lg shadow-xl transform transition-all duration-300 ease-in-out scale-100 hover:scale-105">
+    <h3 class="text-3xl font-extrabold text-gray-900 mb-8 text-center">Détails de la transaction</h3>
+    <div class="space-y-6">
+      <div class="flex justify-between items-center">
+        <p class="text-xl font-medium text-gray-800"><strong>Montant:</strong></p>
+        <p class="text-xl font-bold text-blue-600">{{ selectedTransaction.montant_envoye || selectedTransaction.montant_recus }} F</p>
+      </div>
+      <div class="flex justify-between items-center">
+        <p class="text-xl font-medium text-gray-800"><strong>Expéditeur:</strong></p>
+        <p class="text-xl text-gray-700">{{ selectedTransaction.sender?.prenom + " " + selectedTransaction.sender?.nom }}</p>
+      </div>
+      <div class="flex justify-between items-center">
+        <p class="text-xl font-medium text-gray-800"><strong>Destinataire:</strong></p>
+        <p class="text-xl text-gray-700">{{ selectedTransaction.receiver?.prenom + " " + selectedTransaction.receiver?.nom }}</p>
+      </div>
+      
+      <div class="flex justify-between items-center">
+        <p class="text-xl font-medium text-gray-800"><strong>Date:</strong></p>
+        <p class="text-xl text-gray-700">{{ selectedTransaction.createdAt | date:'short' }}</p>
+      </div>
+    </div>
+    <button (click)="selectedTransaction = null" 
+            class="mt-8 py-3 px-6 bg-red-600 text-white font-bold text-lg rounded-xl w-full shadow-lg transition-all duration-200 hover:bg-red-700 focus:outline-none focus:ring-4 focus:ring-red-500 focus:ring-opacity-50">
+      Fermer
+    </button>
+  </div>
+</div>
+
+
+  </div>
+</div>

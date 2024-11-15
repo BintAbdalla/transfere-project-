@@ -23,6 +23,7 @@ export class VerificationComponent {
   constructor(private fb: FormBuilder, private authService: AuthService, private router: Router) {
     this.codeForm = this.fb.group({
       code: this.fb.array(new Array(6).fill('').map(() => this.fb.control('', Validators.required)))
+      
     });
   }
 
@@ -30,22 +31,29 @@ export class VerificationComponent {
     return (this.codeForm.get('code') as FormArray).controls as FormControl[];
   }
 
+ 
+
   handleVerifyCode() {
     if (this.codeForm.valid) {
+      // Récupérer le code de vérification sous forme de chaîne
       const enteredCode = this.codeControls.map(control => control.value).join('');
       const data = { code_verification: enteredCode }; // Format correct pour l'API
-      
-      console.log('Données envoyées pour la vérification du code:', data); // Vérification du format
-
+  
       this.authService.verifyCode(data).subscribe({
         next: (response) => {
           console.log('Code vérifié avec succès!', response);
-          this.router.navigate(['/home']); // Rediriger vers la page d'accueil ou une autre page
+          
+          // Récupérer le token et le stocker dans le localStorage
+          const token = response.data.token;
+          localStorage.setItem('authToken', token);
+  
+          // Rediriger vers la page d'accueil ou une autre page
+          this.router.navigate(['/home']);
         },
         error: (err) => {
           this.retryCount++;
           console.log(`Tentative ${this.retryCount} échouée`);
-
+  
           // Vérifiez si le nombre maximum de tentatives est atteint
           if (this.retryCount >= this.maxRetries) {
             console.error('Nombre maximum de tentatives atteint');
@@ -57,7 +65,8 @@ export class VerificationComponent {
       console.log('Formulaire invalide');
     }
   }
-
+  
+  
   handleInputChange(index: number, event: Event) {
     const input = event.target as HTMLInputElement;
     const value = input.value;
